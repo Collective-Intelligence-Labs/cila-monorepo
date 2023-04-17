@@ -1,0 +1,55 @@
+﻿syntax = "proto3";
+
+package cila;
+
+option csharp_namespace = "cila.Omnichain";
+
+service Omnichain {
+  rpc Mint (MintRequest) returns (OmnichainResponse);
+  rpc Transfer (TransferRequest) returns (OmnichainResponse);
+}
+
+message MintRequest  
+{  
+   string hash = 1;
+   string sender = 2;
+   string signature = 3;
+}  
+  
+message TransferRequest  
+{  
+   string hash = 1;
+   string sender = 2;
+   string recipient = 3;  
+   string signature = 4;
+}
+
+message OmnichainResponse
+{
+    string chain_id = 1;
+    bool success = 2;
+    string sender = 3;
+}
+
+enum DomainEventType {
+  UNSPECIFIED = 0;
+  NFT_MINTED = 1;
+  NFT_TRANSFERED = 2;
+};
+
+message DomainEvent {
+  uint64 evnt_idx = 1;
+  DomainEventType evnt_type = 2;
+  bytes evnt_payload = 3;
+}
+
+message NFTMintedPayload {
+    bytes hash = 1;
+    bytes owner = 2;
+}
+
+message NFTTransferedPayload {
+    bytes hash = 1;
+    bytes from = 2;
+    bytes to = 3;
+}

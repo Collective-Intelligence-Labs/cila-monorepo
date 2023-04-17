@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cila.Router", "Cila.Router\Cila.Router.csproj", "{BD351A81-84D2-429A-8C8F-C1FED21F5732}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cila.Aggregator", "Cila.Aggregator\Cila.Aggregator.csproj", "{4BB42213-D881-4988-B047-2CC2F62025A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cila.Relay", "Cila.Relay\Cila.Relay.csproj", "{91F0A78F-452D-4348-88B8-3EDFDF0927F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cila.Client.Blazor", "Cila.Client.Blazor\cila.Client.Blazor.csproj", "{CE48461A-99DA-45F8-9066-B04C7A973914}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clients", "Clients", "{AD874F06-363A-473E-898D-E2488372A469}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cila.Domain", "Cila.Domain\Cila.Domain.csproj", "{F1CAB1C2-31B2-4651-B1D8-2FA5300CFD29}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BD351A81-84D2-429A-8C8F-C1FED21F5732}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD351A81-84D2-429A-8C8F-C1FED21F5732}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD351A81-84D2-429A-8C8F-C1FED21F5732}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD351A81-84D2-429A-8C8F-C1FED21F5732}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BB42213-D881-4988-B047-2CC2F62025A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BB42213-D881-4988-B047-2CC2F62025A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BB42213-D881-4988-B047-2CC2F62025A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BB42213-D881-4988-B047-2CC2F62025A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91F0A78F-452D-4348-88B8-3EDFDF0927F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91F0A78F-452D-4348-88B8-3EDFDF0927F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91F0A78F-452D-4348-88B8-3EDFDF0927F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91F0A78F-452D-4348-88B8-3EDFDF0927F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE48461A-99DA-45F8-9066-B04C7A973914}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE48461A-99DA-45F8-9066-B04C7A973914}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE48461A-99DA-45F8-9066-B04C7A973914}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE48461A-99DA-45F8-9066-B04C7A973914}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1CAB1C2-31B2-4651-B1D8-2FA5300CFD29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1CAB1C2-31B2-4651-B1D8-2FA5300CFD29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1CAB1C2-31B2-4651-B1D8-2FA5300CFD29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1CAB1C2-31B2-4651-B1D8-2FA5300CFD29}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CE48461A-99DA-45F8-9066-B04C7A973914} = {AD874F06-363A-473E-898D-E2488372A469}
+	EndGlobalSection
+EndGlobal

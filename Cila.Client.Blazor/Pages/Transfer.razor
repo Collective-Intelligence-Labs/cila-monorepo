@@ -1,0 +1,102 @@
+﻿@using System.Text
+@using Nethereum.Signer
+@using Google.Protobuf.WellKnownTypes
+@using cila.Omnichain;
+
+@inject GrpcChannel Channel
+
+
+
+@page "/transfer"
+
+<h1>Transfer</h1>
+
+<p>
+    Item hash: 
+    <input type="text" @bind="@hash" @oninput="OnHashInputEvent" style="width: 400px;" />
+</p>
+
+<p>
+    Transfer to:
+    <input type="text" @bind="@to" @oninput="OnToInputEvent" style="width: 400px;" />
+</p>
+
+<p>
+    Private key:
+    <textarea @bind="@pk" @oninput="OnPkInputEvent" style="width: 400px;"></textarea>
+</p>
+
+<p>
+    <h3>Data</h3>
+</p>
+<p>
+    Hash: @hash
+</p>
+
+<p>
+    Signature: @signature
+</p>
+
+<p>
+    Transfer to: @to
+</p>
+
+<p>
+    Sender: @me
+</p>
+
+<p>
+    Response: @response
+</p>
+
+<button class="btn btn-primary" @onclick="TransferNow">Sign and transfer</button>
+
+@code {
+    private string hash = "5d41402abc4b2a76b9719d911017c592";
+    private string pk = string.Empty;
+    private string signature = string.Empty;
+    private string me = string.Empty;
+    private string response = string.Empty;
+    private string to = string.Empty;
+
+    private void OnHashInputEvent(ChangeEventArgs args)
+    {
+        hash = args.Value.ToString();
+    }
+
+    private void OnPkInputEvent(ChangeEventArgs args)
+    {
+        pk = args.Value.ToString();
+    }
+
+    private void OnToInputEvent(ChangeEventArgs args)
+    {
+        to = args.Value.ToString();
+    }
+
+    private async Task TransferNow()
+    {
+        try
+        {
+            var signer = new MessageSigner();
+            signature = signer.HashAndSign(hash, pk);
+
+            me = signer.HashAndEcRecover(hash, signature);
+
+            var client = new Omnichain.OmnichainClient(Channel);
+            var request = new cila.Omnichain.TransferRequest();
+            request.Hash = hash;
+            request.Sender = me;
+            request.Signature = signature;
+            request.Recipient = to;
+
+            OmnichainResponse omnichainResponse = await client.TransferAsync(request);
+            response = omnichainResponse.ToString();
+        }
+        catch (Exception ex)
+        {
+            response = ex.Message;
+        }
+    }
+}
+
