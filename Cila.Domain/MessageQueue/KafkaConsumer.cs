@@ -1,3 +1,4 @@
+using Cila.Domain.MessageQueue;
 using Cila.Serialization;
 using Confluent.Kafka;
 using System;
@@ -8,16 +9,14 @@ namespace Cila
 {
     public class KafkaConsumer
     {
-        private readonly ConsumerConfig config;
         private readonly IConsumer<string, byte[]> consumer;
 
         private readonly EventsDispatcher dispatcher;
 
-        public KafkaConsumer(ConsumerConfig config, EventsDispatcher dispatcher)
+        public KafkaConsumer(KafkaConfigProvider configProvider, EventsDispatcher dispatcher)
         {
-            this.config = config;
             this.dispatcher = dispatcher;
-            consumer = new ConsumerBuilder<string, byte[]>(config).Build();
+            consumer = new ConsumerBuilder<string, byte[]>(configProvider.GetConsumerConfig()).Build();
         }
 
         public async Task ConsumeAsync(string topic, CancellationToken cancellationToken)

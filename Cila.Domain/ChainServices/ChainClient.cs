@@ -112,44 +112,58 @@ namespace Cila
 
             var function = _handler.GetFunction<DispatchFunction>();
 
-            var abi = new ABIEncode();
-
             var opBytes = op.ToByteArray();
+            
             var req = new DispatchFunction
             {
                 OpBytes = opBytes
             };
+
             req.FromAddress = _account.Address;
+
             var _queryHandler = _web3.Eth.GetContractQueryHandler<DispatchFunction>();
             var txHandler = _web3.Eth.GetContractTransactionHandler<DispatchFunction>();
+
             var gasEstimate = await txHandler.EstimateGasAsync(_handler.ContractAddress, req);
-            req.Gas = gasEstimate.Value;
+            req.Gas = gasEstimate;
 
             var receipt = await txHandler.SendRequestAndWaitForReceiptAsync(_handler.ContractAddress, req);
             return new ChainResponse {
+                ChainId = _web3.Eth.ChainId.SendRequestAsync().GetAwaiter().GetResult().ToString(),
                 ContractAddress = receipt.ContractAddress,
                 EffectiveGasPrice = receipt.EffectiveGasPrice.ToUlong(),
                 GasUsed = receipt.GasUsed.ToUlong(),
                 CumulativeGasUsed = receipt.CumulativeGasUsed.ToUlong(),
                 BlockHash = receipt.BlockHash,
                 BlockNumber = receipt.BlockNumber.ToUlong(),
-                Logs = receipt.Logs.ToString()
+                Logs = receipt.Logs.ToString(),
+                TransactionHash = receipt.TransactionHash,
+                TransactionIndex = receipt.TransactionIndex.ToUlong()
             };
         }
 
         public async Task<string> PushAsync(string aggregateId, UInt32 position, IEnumerable<byte[]> events)
         {
-            var handler = _handler.GetFunction<PushBytesFunction>();
-            var request = new PushBytesFunction{
+            var _queryHandler = _web3.Eth.GetContractQueryHandler<PushBytesFunction>();
+            var txHandler = _web3.Eth.GetContractTransactionHandler<PushBytesFunction>();
+
+            var request = new PushBytesFunction
+            {
                 Events = events.ToList(),
                 Position = position,
                 AggregateId = aggregateId
             };
-            foreach (var ev in request.Events){
+
+            foreach (var ev in request.Events)
+            {
                 Console.WriteLine("Event: " + Convert.ToHexString(ev));
             }
-            var result = await handler.CallAsync<string>(request, _account.Address, new HexBigInteger(210000), new HexBigInteger(0));
-            Console.WriteLine("Chain Service Push} executed: {0}", result);
+
+            var gasEstimate = await txHandler.EstimateGasAsync(_handler.ContractAddress, request);
+            request.Gas = new BigInteger(2 * gasEstimate.ToUlong());
+            var result = await txHandler.SendRequestAsync(_handler.ContractAddress, request);
+
+            Console.WriteLine("Chain Service Push executed: {0}", result);
             return result;
         }
         public void Push(string aggregateId, UInt32 position, IEnumerable<byte[]> events)
@@ -167,6 +181,7 @@ namespace Cila
 
     public class ChainResponse
     {
+        public string ChainId {get;set;}
         public string ContractAddress { get; set; }
         public ulong EffectiveGasPrice { get; set; }
         public ulong GasUsed { get; set; }

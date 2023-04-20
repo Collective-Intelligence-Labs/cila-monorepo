@@ -1,7 +1,7 @@
 {
-    "AggregatorSettings": {
+    "Settings": {
       "AggregatorId": "ID",
-      "SingletonAggregateID": "123456789",
+      "SingletonAggregateID": "8863F36E552Fd66296C0b3a3D2e4028105226DB7",
       "MongoDBConnectionString": "mongodb://localhost:27017",
       "Chains": [
         {

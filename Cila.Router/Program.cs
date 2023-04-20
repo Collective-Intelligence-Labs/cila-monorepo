@@ -7,8 +7,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Google.Protobuf;
 using Swashbuckle.AspNetCore.SwaggerGen;
-
-
+using Cila.Domain.MessageQueue;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,23 +22,6 @@ var builder = WebApplication.CreateBuilder(args);
         var settings = configuration.GetSection("Settings").Get<OmniChainSettings>();
 
 
- var configProducer = new ProducerConfig
-        {
-            BootstrapServers = "localhost:9092",
-            ClientId = "dotnet-kafka-producer",
-            Acks = Acks.All,
-            MessageSendMaxRetries = 10,
-            MessageTimeoutMs = 10000,
-            EnableIdempotence = true,
-            CompressionType = CompressionType.Snappy,
-            BatchSize = 16384,
-            LingerMs = 10,
-            MaxInFlight = 5,
-            EnableDeliveryReports = true,
-            DeliveryReportFields = "all"
-        };
-
-
 builder.Services
     .AddScoped<MongoDatabase>()
     .AddSingleton(settings)
@@ -51,8 +33,8 @@ builder.Services
     .AddScoped<ChainClientsFactory>()
     .AddScoped<AggregagtedEventsService>()
     .AddScoped<OperationGenerator>()
-    .AddSingleton(configProducer)
-    .AddSingleton<KafkaProducer>()
+    .AddScoped<KafkaConfigProvider>()
+    .AddScoped<KafkaProducer>()
     .AddScoped<RandomRouter>()
     .AddScoped<EfficientRouter>();
 

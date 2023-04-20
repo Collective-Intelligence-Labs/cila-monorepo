@@ -38,7 +38,6 @@ namespace Cila
         private string _singletonAggregateID;
         private readonly EventStore _eventStore;
         private readonly EventsTransmitter _eventsTransmitter;
-        private uint _lastBlock = 0;
 
         private readonly KafkaProducer _producer;
 
@@ -53,8 +52,11 @@ namespace Cila
         public void Update()
         {
             var hashProvider = new Sha3KeccackHashProvider();
+            //TODO: replace with actual last block pulling for a specific chain
+            var lastBlock = _eventStore.GetLatestVersion(_singletonAggregateID) ?? 0;
             //TODO: Replace with pulling new events for all aggregate after specific block
-            var newEvents = ChainService.Pull(_lastBlock, _singletonAggregateID);
+            var newEvents = ChainService.Pull(lastBlock, _singletonAggregateID);
+            newEvents = newEvents ?? new List<byte[]>();
             var aggregates = newEvents.Select(x => 
             { 
                 var domainEvent = OmniChainSerializer.DeserializeDomainEvent(x);
@@ -66,19 +68,19 @@ namespace Cila
                 Hash = hashProvider.ComputeHash(domainEvent.EvntPayload.ToByteArray()), //replace with retrieving it from the chain and validating
                 Version = domainEvent.EvntIdx
                 };
-            }).GroupBy(x=> x.AggregateId);
+            }).OrderBy(x => x.Version).GroupBy(x=> x.AggregateId);
 
             foreach (var aggregate in aggregates){
                 var newVersion = aggregate.Max(x=> x.Version);
-                var startIndex = aggregate.Min(x=> x.Version);
                 var currentVersion = _eventStore.GetLatestVersion(aggregate.Key);
                 //TODO: Add conflic resolution logic here: we need to add getting also a hash of latest version merkle tree of all events and then checking if there are a different with the once we receive from the chain because we might push additional events that different by hash not by version
                 if (currentVersion == null || currentVersion < newVersion)
                 {
+                    var startIndex = aggregate.Min(x=> x.Version);
                     // selects new events if current Version null then all events
                     var events = currentVersion == null ? aggregate : aggregate.Where(x=> x.Version > currentVersion);
                     try {
-                        _eventsTransmitter.Dispatch(ID, aggregate.Key , events, (UInt32)startIndex );
+                        _eventsTransmitter.Dispatch(ID, aggregate.Key , events, (UInt32)startIndex);
                         _eventStore.AppendEvents(aggregate.Key, events);
                         ProduceInfrastructureEvent(events, aggregate.Key, null);
                     } catch (SmartContractCustomErrorRevertException e)

@@ -22,7 +22,7 @@ namespace Cila
             this.aggregagtedEventsService = aggregagtedEventsService;
         }
 
-        public async Task Dispatch(Operation operation)
+        public async Task<IEnumerable<ChainResponse>> Dispatch(Operation operation)
         {
             var context = RouterContext.Default;
             var router = provider.GetRouter(context);
@@ -43,7 +43,7 @@ namespace Cila
                     ChainId = x.Key
                 };
             });
-
+            var result = new List<ChainResponse>();
             foreach (var rOp in routedOperations)
             {
                 var versionNullable = aggregagtedEventsService.GetLastVersion(settings.SingletonAggregateID);
@@ -53,49 +53,53 @@ namespace Cila
                 {
                     var client = clientsFactory.GetChainClient(rOp.ChainId);
                     var response = await client.SendAsync(rOp.Operation);
+                    result.Add(response);
                     // Change with setting operation ID on the client
 
                     executionsService.Record(operationId, rOp.ChainId, response, context.Stretagy, router.GetType().Name);
                     
                     //Send infrastructure event
-                    await ProduceInfrastructureEvent(rOp.ChainId, 
-                    /* TODO: replace with list of aggregates */ rOp.Operation.Commands.First().AggregateId.ToString(),
-                    operationId.ToString(),
-                    rOp.Operation.RouterId.ToString(),
-                    rOp.Operation.Commands.ToList(),
-                    null);
+                    await ProduceInfrastructureEvent(rOp.ChainId,
+                        settings.SingletonAggregateID,
+                        operationId.ToString(),
+                        rOp.Operation.RouterId.ToString() ?? "Unspecified",
+                        rOp.Operation.Commands.ToList(),
+                        null);
                 }
                 catch (System.Exception e)
                 {
-                    await ProduceInfrastructureEvent(rOp.ChainId, 
-                    /* TODO: replace with list of aggregates */ rOp.Operation.Commands.First().AggregateId.ToString(),
-                    operationId.ToString(),
-                    rOp.Operation.RouterId.ToString(),
-                    rOp.Operation.Commands.ToList(),
-                    e.Message);
+                    await ProduceInfrastructureEvent(
+                        rOp.ChainId,
+                        settings.SingletonAggregateID,
+                        operationId.ToString(),
+                        rOp.Operation.RouterId.ToString() ?? "Unspecified",
+                        rOp.Operation.Commands.ToList(),
+                        e.Message);
                 }
-                
             }
+            return result;
         }
 
         private async Task ProduceInfrastructureEvent(string chainId, string aggregateId, string operationId, string routerId, List<Command> cmds, string errorMessage)
         {
-             var infEvent = new InfrastructureEvent{
-                        Id = Guid.NewGuid().ToString(),
-                        EvntType = InfrastructureEventType.TransactionRoutedEvent,
-                        AggregatorId = aggregateId,
-                        //ChainId = chainId,
-                        OperationId = operationId,
-                        CoreId = errorMessage //TODO: replace with normal error handling
-                    };
-                    foreach (var cmd in cmds)
-                    {
-                        infEvent.Commands.Add( new DomainCommandDto{
-                                AggregateId = cmd.AggregateId.ToString(),
-                                Timespan = Timestamp.FromDateTime(DateTime.UtcNow),
-                        });
-                    }
-                    await producer.ProduceAsync("infr", infEvent);
+            var infEvent = new InfrastructureEvent
+            {
+                Id = Guid.NewGuid().ToString(),
+                EvntType = InfrastructureEventType.TransactionRoutedEvent,
+                AggregatorId = aggregateId,
+                //ChainId = chainId,
+                OperationId = operationId,
+                CoreId = errorMessage //TODO: replace with normal error handling
+            };
+            foreach (var cmd in cmds)
+            {
+                infEvent.Commands.Add(new DomainCommandDto
+                {
+                    AggregateId = cmd.AggregateId.ToString(),
+                    Timespan = Timestamp.FromDateTime(DateTime.UtcNow),
+                });
+            }
+            await producer.ProduceAsync("infr", infEvent);
         }
     }
 

@@ -16,7 +16,7 @@ namespace Cila
             var kafkaConfigProvider = new KafkaConfigProvider();
             var db = new Database.MongoDatabase(config);
             var subsService = new SubscriptionsService(db);
-            var kafkraProducer = new KafkaProducer(kafkaConfigProvider.GetProducerConfig());
+            var kafkraProducer = new KafkaProducer(new KafkaConfigProvider());
             var subs = subsService.GetAllFor(config.SingletonAggregateID).ToList();
             foreach (var item in config.Chains)
             {

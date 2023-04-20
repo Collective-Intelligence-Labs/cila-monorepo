@@ -1,5 +1,6 @@
 using Cila;
 using Cila.Database;
+using Cila.Domain.MessageQueue;
 using Confluent.Kafka;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,39 +17,9 @@ internal class Program
         // Add services to the container.
 
         var cnfg = new ConfigurationBuilder();
-        var configuration = cnfg.AddJsonFile("aggregatorsettings.json")
+        var configuration = cnfg.AddJsonFile("settings.json")
             .Build();
-        AppSettings = configuration.GetSection("AggregatorSettings").Get<OmniChainSettings>();
-
-        var configProducer = new ProducerConfig
-        {
-            BootstrapServers = "localhost:9092",
-            ClientId = "dotnet-kafka-producer",
-            Acks = Acks.All,
-            MessageSendMaxRetries = 10,
-            MessageTimeoutMs = 10000,
-            EnableIdempotence = true,
-            CompressionType = CompressionType.Snappy,
-            BatchSize = 16384,
-            LingerMs = 10,
-            MaxInFlight = 5,
-            EnableDeliveryReports = true,
-            DeliveryReportFields = "all"
-        };
-        var configConsumer = new ConsumerConfig
-        {
-            BootstrapServers = "localhost:9092",
-            ClientId = "dotnet-kafka-consumer",
-            GroupId = "test-group",
-            AutoOffsetReset = AutoOffsetReset.Earliest,
-            EnableAutoCommit = false,
-            MaxPollIntervalMs = 10000,
-            EnablePartitionEof = true,
-            SessionTimeoutMs = 6000,
-            FetchWaitMaxMs = 1000,
-            IsolationLevel = IsolationLevel.ReadCommitted,
-            Acks = Acks.All
-        };
+        AppSettings = configuration.GetSection("Settings").Get<OmniChainSettings>();
 
         var services = builder.Services;
 
@@ -61,9 +32,8 @@ internal class Program
             .AddScoped<ChainClientsFactory>();
             
         services.AddSingleton<EventsDispatcher>();
-        services.AddSingleton(configProducer);
-        services.AddSingleton(configConsumer);
 
+        services.AddScoped<KafkaConfigProvider>();
         services.AddSingleton<KafkaConsumer>();
         services.AddSingleton<KafkaProducer>();
 

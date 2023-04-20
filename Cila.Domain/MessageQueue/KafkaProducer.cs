@@ -1,3 +1,4 @@
+using Cila.Domain.MessageQueue;
 using Confluent.Kafka;
 using Google.Protobuf;
 using System;
@@ -7,13 +8,11 @@ namespace Cila
 {
     public class KafkaProducer
     {
-        private readonly ProducerConfig config;
         private readonly IProducer<string, byte[]> producer;
 
-        public KafkaProducer(ProducerConfig config)
+        public KafkaProducer(KafkaConfigProvider configProvider)
         {
-            this.config = config;
-            producer = new ProducerBuilder<string, byte[]>(config).SetValueSerializer(Serializers.ByteArray).Build();
+            producer = new ProducerBuilder<string, byte[]>(configProvider.GetProducerConfig()).SetValueSerializer(Serializers.ByteArray).Build();
         }
 
         public async Task ProduceAsync(string topic, InfrastructureEvent message)

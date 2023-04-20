@@ -1,5 +1,6 @@
 using Cila;
 using Cila.Database;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 public class EventStore
@@ -14,6 +15,12 @@ public class EventStore
         var indexKeysDefinition = Builders<ExecutionChainEvent>.IndexKeys.Ascending(e => e.AggregateId);
         var indexModel = new CreateIndexModel<ExecutionChainEvent>(indexKeysDefinition);
         _events.Indexes.CreateOne(indexModel);
+    }
+
+    public async Task<IEnumerable<string>> GetAggregateIds()
+    {
+        var filter = new BsonDocument();
+        return _events.Distinct<string>("AggregateId", filter).ToList();
     }
 
     public async Task<IEnumerable<ExecutionChainEvent>> GetEvents(string aggregateId)
