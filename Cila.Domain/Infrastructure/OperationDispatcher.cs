@@ -31,6 +31,7 @@ namespace Cila
                 Route = router.CalculateRoute(x)
             }).GroupBy(x=> x.Route.ChainId).Select(x=> 
             { 
+                Console.WriteLine("Sending from group: " + x.Key);
                 var op = new Operation {
                     RouterId = operation.RouterId
                 };

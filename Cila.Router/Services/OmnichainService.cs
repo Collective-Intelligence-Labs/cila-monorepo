@@ -57,7 +57,7 @@ public class OmnichainService : Omnichain.OmnichainBase
                 Sender = request.Sender
             };
             var log = result.Select(x => string.Format("Executed on chain {0}, tx: {1}", x.ChainId, x.TransactionHash));
-            Console.WriteLine(log);
+            Console.WriteLine("Dispatch Log: " + string.Concat(log));
             response.Logs.AddRange(log);
             return response;
         }
